@@ -1,0 +1,106 @@
+package player.ai;
+
+import board.Board;
+import board.Move;
+import player.MoveTransition;
+
+
+public class MiniMax implements MoveStrategy{
+
+    private final BoardEvaluator boardEvaluator;
+    private final int searchDepth;
+    
+    public MiniMax(final int searchDepth){
+        this.searchDepth = searchDepth;
+        this.boardEvaluator = new StandardBoardEvaluator();
+    }
+    
+    @Override
+    public String toString(){
+        return "MiniMax";
+    }
+    
+    @Override
+    public Move execute(Board board) {
+        
+        final long startTime = System.currentTimeMillis();
+        
+        Move bestMove = null;
+        
+        int highestSeenValue = Integer.MIN_VALUE;
+        int lowestSeenValue = Integer.MAX_VALUE;
+        int currentValue;
+        
+        //System.out.println(board.currentPlayer() + " Enemy AI thinking");
+        
+        int numMoves = board.currentPlayer().getLegalMoves().size();
+        System.out.println("There are "+numMoves + " possible moves");
+        
+        for(final Move move : board.currentPlayer().getLegalMoves()){
+            
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+            if(moveTransition.getMoveStatus().isDone()){
+                
+                currentValue = board.currentPlayer().getAlliance().isWhite() ?  
+                        min(moveTransition.getTransitionBoard(), this.searchDepth -1) : //white is maximizing player
+                        max(moveTransition.getTransitionBoard(), this.searchDepth -1); //black is the maximizing player
+                
+                if(board.currentPlayer().getAlliance().isWhite() && currentValue >= highestSeenValue){ //white wants highest seen score
+                    highestSeenValue = currentValue;
+                    bestMove = move;
+                }else if(board.currentPlayer().getAlliance().isBlack() && currentValue <= lowestSeenValue){ //black wants lowest seen score
+                    lowestSeenValue = currentValue;
+                    bestMove = move;
+                }
+            }
+        }     
+        
+        final long executionTime = System.currentTimeMillis() - startTime;
+        //System.out.println("Total time spent calculating: "+ executionTime + " seconds");
+        
+        return bestMove;
+    }
+    
+    public int min(final Board board, final int depth){
+        
+        if(depth == 0 || isEndGameScenario(board)){ //if finished evaluating or game over
+            return this.boardEvaluator.evaluate(board, depth);
+        }
+        
+        int lowestSeenValue = Integer.MAX_VALUE; //starts with highest possible value
+        for(final Move move : board.currentPlayer().getLegalMoves()){ //goes through each possible move at current layer
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move); //makes each move possible
+            if(moveTransition.getMoveStatus().isDone()){
+                final int currentValue = max(moveTransition.getTransitionBoard(), depth -1);
+                if(currentValue <= lowestSeenValue){
+                    lowestSeenValue = currentValue; //record lowest value seen in all possible moves
+                }
+            }
+        }
+        return lowestSeenValue; //returns lowest value
+    }
+    
+    private static boolean isEndGameScenario(final Board board){
+        return board.currentPlayer().isInCheckMate() ||
+                board.currentPlayer().isInStaleMate();
+    }
+    
+    public int max(final Board board, final int depth){
+        
+        if(depth == 0 || isEndGameScenario(board)){ //if finished evaluating or game over
+            return this.boardEvaluator.evaluate(board, depth);
+        }
+        
+        int highestSeenValue = Integer.MIN_VALUE; //starts with smallest possible value
+        for(final Move move : board.currentPlayer().getLegalMoves()){ //goes through each possible move at current layer
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move); //makes each move possible
+            if(moveTransition.getMoveStatus().isDone()){
+                final int currentValue = min(moveTransition.getTransitionBoard(), depth -1);
+                if(currentValue >= highestSeenValue){
+                    highestSeenValue = currentValue; //record highest value seen in all possible moves
+                }
+            }
+        }
+        return highestSeenValue; //returns highest value
+    }
+}
