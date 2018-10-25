@@ -3,7 +3,7 @@ package player.ai;
 import board.Board;
 import board.Move;
 import player.MoveTransition;
-
+import java.util.Random;
 
 public class MiniMax implements MoveStrategy{
 
@@ -30,6 +30,7 @@ public class MiniMax implements MoveStrategy{
         int highestSeenValue = Integer.MIN_VALUE;
         int lowestSeenValue = Integer.MAX_VALUE;
         int currentValue;
+        int randomInt;
         
         //System.out.println(board.currentPlayer() + " Enemy AI thinking");
         
@@ -46,14 +47,37 @@ public class MiniMax implements MoveStrategy{
                         max(moveTransition.getTransitionBoard(), this.searchDepth -1); //black is the maximizing player
                 
                 if(board.currentPlayer().getAlliance().isWhite() && currentValue >= highestSeenValue){ //white wants highest seen score
-                    highestSeenValue = currentValue;
-                    bestMove = move;
+                        //highestSeenValue = currentValue;
+                        if(currentValue == highestSeenValue){
+                            randomInt = new Random().nextInt(10);
+                            if(randomInt > 4){
+                                highestSeenValue = currentValue;
+                                bestMove = move;}
+                            else
+                                ;//do not take currentValue
+                        }else{
+                            highestSeenValue = currentValue;
+                            bestMove = move;
+                        }
+                        //bestMove = move;
                 }else if(board.currentPlayer().getAlliance().isBlack() && currentValue <= lowestSeenValue){ //black wants lowest seen score
-                    lowestSeenValue = currentValue;
-                    bestMove = move;
+                        //lowestSeenValue = currentValue;
+                        if(currentValue == lowestSeenValue){
+                            randomInt = new Random().nextInt(10);
+                            if(randomInt > 4){
+                                lowestSeenValue = currentValue;
+                                bestMove = move;}
+                            else
+                                ;//do not take currentValue
+                        }else{
+                            lowestSeenValue = currentValue;
+                            bestMove = move;
+                        }
+                            
+                        //bestMove = move;
                 }
             }
-        }     
+        }
         
         final long executionTime = System.currentTimeMillis() - startTime;
         //System.out.println("Total time spent calculating: "+ executionTime + " seconds");
