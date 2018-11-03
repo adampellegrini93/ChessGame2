@@ -50,9 +50,10 @@ public class MiniMax implements MoveStrategy{
                         //highestSeenValue = currentValue;
                         if(currentValue == highestSeenValue){
                             randomInt = new Random().nextInt(10);
-                            if(randomInt > 4){
+                            if(randomInt > 5){
                                 highestSeenValue = currentValue;
-                                bestMove = move;}
+                                bestMove = move;
+                            }
                             else
                                 ;//do not take currentValue
                         }else{
@@ -64,9 +65,10 @@ public class MiniMax implements MoveStrategy{
                         //lowestSeenValue = currentValue;
                         if(currentValue == lowestSeenValue){
                             randomInt = new Random().nextInt(10);
-                            if(randomInt > 4){
+                            if(randomInt > 5){
                                 lowestSeenValue = currentValue;
-                                bestMove = move;}
+                                bestMove = move;
+                            }
                             else
                                 ;//do not take currentValue
                         }else{
