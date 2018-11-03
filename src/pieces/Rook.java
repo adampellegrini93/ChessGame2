@@ -40,41 +40,58 @@ public class Rook extends Piece{
                 } 
                 candidateDestinationCoordinate += candidateCoordinateOffset; //applys offset to current position    
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
-                    final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
-                    if (!candidateDestinationTile.isTileOccupied()) { //if not occupied by another piece currently
-                        legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-                    } else { //if desination is currently occupied
-                        final Piece pieceAtDestination = candidateDestinationTile.getPiece();
-                        final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                        if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                            legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    if ((candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 5))) &&
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 6))) &&
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 7)))){ //do not consider movements greater than 4 spaces
+                        final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+                        if (!candidateDestinationTile.isTileOccupied()) { //if not occupied by another piece currently
+                            legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                        } else { //if desination is currently occupied
+                            final Piece pieceAtDestination = candidateDestinationTile.getPiece();
+                            final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                            if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                                legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
         }
         //for fuzzy logic move ability
         for(final int currentCandidateOffset : CANDIDATE_MOVE_COORDINATES){
-            int candidateDestinationCoordinate = this.piecePosition + (this.getPieceAlliance().getDirection() * currentCandidateOffset); 
+            int candidateDestinationCoordinate = this.piecePosition + (this.getPieceAlliance().getDirection() * currentCandidateOffset);
             if(!BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)){
                 continue;
             }
             //for moving diagnally backwards to the right/and diagnally forward to the right
             else if((currentCandidateOffset == -9 || currentCandidateOffset == 7) && 
-                    (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) &&
                     !((BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
                     (BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                } else {
+                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
+                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    }
+                }
             }
             //for moving diagnally backwards to the left/ and diagnally forward to the left
-            else if((currentCandidateOffset == -7 || currentCandidateOffset == 9 ) && 
-                    (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) &&
+            else if((currentCandidateOffset == -7 || currentCandidateOffset == 9) && 
                     !((BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
                     (BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-            }
-            
+                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                } else {
+                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
+                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    }
+                }
+            } 
         }
         return Collections.unmodifiableList(legalMoves);
     }

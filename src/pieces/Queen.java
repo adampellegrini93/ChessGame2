@@ -3,6 +3,7 @@ package pieces;
 import board.Board;
 import board.BoardUtils;
 import board.Move;
+import board.Move.MajorMove;
 import board.Move.MajorAttackMove;
 import board.Tile;
 import java.util.ArrayList;
@@ -36,16 +37,20 @@ public class Queen extends Piece{
                 } 
                 candidateDestinationCoordinate += candidateCoordinateOffset; //applys offset to current position    
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
-                    final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
-                    if (!candidateDestinationTile.isTileOccupied()) { //if not occupied by another piece currently
-                        legalMoves.add(new Move.MajorMove(board, this, candidateDestinationCoordinate));
-                    } else { //if desination is currently occupied
-                        final Piece pieceAtDestination = candidateDestinationTile.getPiece();
-                        final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                        if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                            legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    if ((candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 5))) &&
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 6))) &&
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 7)))){ //do not consider movements greater than 4 spaces   
+                        final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+                        if (!candidateDestinationTile.isTileOccupied()) { //if not occupied by another piece currently
+                            legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                        } else { //if desination is currently occupied
+                            final Piece pieceAtDestination = candidateDestinationTile.getPiece();
+                            final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                            if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                                legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }

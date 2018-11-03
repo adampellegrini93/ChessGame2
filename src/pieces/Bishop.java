@@ -37,11 +37,12 @@ public class Bishop extends Piece{
                 } 
                 candidateDestinationCoordinate += candidateCoordinateOffset; //applys offset to current position    
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
-                    MajorMove temp = new MajorMove(board, this,candidateDestinationCoordinate);
-                    if (!legalMoves.contains(temp)) {
+                    if ((candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 5))) &&
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 6))) &&
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 7)))){ //do not consider movements greater than 4 spaces
                         final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
                         if (!candidateDestinationTile.isTileOccupied()) { //if not occupied by another piece currently
-                            legalMoves.add(new Move.MajorMove(board, this, candidateDestinationCoordinate));
+                            legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
                         } else { //if desination is currently occupied
                             final Piece pieceAtDestination = candidateDestinationTile.getPiece();
                             final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
@@ -62,30 +63,60 @@ public class Bishop extends Piece{
                 continue;
             }
             //for moving backwards
-            if((currentCandidateOffset == -8 && (!board.getTile(candidateDestinationCoordinate).isTileOccupied())) &&
+            if((currentCandidateOffset == -8) &&
                     ((this.pieceAlliance.isWhite() && !BoardUtils.FIRST_RANK[this.piecePosition]) || 
                     (this.pieceAlliance.isBlack() && !BoardUtils.EIGHTH_RANK[this.piecePosition]))){
-                legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                } else {
+                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
+                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    }
+                }
             }
             //for moving forward
-            else if((currentCandidateOffset == 8 && (!board.getTile(candidateDestinationCoordinate).isTileOccupied())) &&
+            else if((currentCandidateOffset == 8) &&
                     ((this.pieceAlliance.isWhite() && !BoardUtils.EIGHTH_RANK[this.piecePosition]) || 
                     (this.pieceAlliance.isBlack() && !BoardUtils.FIRST_RANK[this.piecePosition]))){
-                legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                } else {
+                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
+                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    }
+                }
             }
             //for moving to left
             else if((currentCandidateOffset == 1) && 
-                    (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) &&
                     !((BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
                     (BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                } else {
+                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
+                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    }
+                }
             }
             //for moving to the right
             else if((currentCandidateOffset == -1) && 
-                    (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) &&
                     !((BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
                     (BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
+                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
+                } else {
+                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
+                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
+                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
+                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    }
+                }
             }
         }
         return Collections.unmodifiableList(legalMoves);
