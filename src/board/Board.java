@@ -29,6 +29,7 @@ public class Board {
     private final WhitePlayer whitePlayer;
     private final BlackPlayer blackPlayer;
     private final Player currentPlayer;
+    private int moveCount;
     
     private final Pawn enPassantPawn;
     
@@ -42,6 +43,7 @@ public class Board {
         this.whitePlayer = new WhitePlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
         this.blackPlayer = new BlackPlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
         this.currentPlayer = builder.nextMoveMaker.choosePlayer(this.whitePlayer, this.blackPlayer);
+        this.moveCount = builder.moveCount;
     }
     
     @Override
@@ -79,6 +81,10 @@ public class Board {
     
     public Collection<Piece> getWhitePieces(){
         return this.whitePieces;
+    }
+    
+    public int getMoveCount(){
+        return moveCount;
     }
     
     private Collection<Move> calculateLegalMoves(final Collection<Piece> pieces) { 
@@ -150,6 +156,7 @@ public class Board {
         builder.setPiece(new Rook(Alliance.White,63));
 
         builder.setMoveMaker(Alliance.White);
+        builder.setMoveCount(0);
 
         return builder.build();
     }
@@ -167,6 +174,7 @@ public class Board {
         Alliance nextMoveMaker;
         Pawn enPassantPawn;
         Move transitionMove;
+        int moveCount;
         
         public Builder(){
             this.boardConfig = new HashMap<>();
@@ -184,6 +192,11 @@ public class Board {
         
         public Builder setMoveTransition(final Move transitionMove){
             this.transitionMove = transitionMove;
+            return this;
+        }
+        
+        public Builder setMoveCount(final int moveCount){
+            this.moveCount = moveCount;
             return this;
         }
         

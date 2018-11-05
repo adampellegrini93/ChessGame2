@@ -267,7 +267,7 @@ public class Table extends Observable{
             try {
                 final Move bestMove = get();
                 Table.get().updateComputerMove(bestMove);
-                Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove).getTransitionBoard());
+                Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove, true).getTransitionBoard());
                 System.out.println(Table.get().getGameBoard().currentPlayer().getOpponent().toString() + " player has made their move!");
                 Table.get().getMoveLog().addMove(bestMove);
                 Table.get().getGameHistoryPanel().redo(Table.get().getGameBoard(), Table.get().getMoveLog());
@@ -405,7 +405,7 @@ public class Table extends Observable{
                             destinationTile = chessBoard.getTile(tileID);
                             final Move move = MoveFactory.createMove(chessBoard, 
                                     sourceTile.getTileCoordinate(), destinationTile.getTileCoordinate());
-                            final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
+                            final MoveTransition transition = chessBoard.currentPlayer().makeMove(move, true);
                             if(transition.getMoveStatus().isDone()){
                                 if(info.isVisible()){
                                     info.addText(chessBoard.currentPlayer().toString()+" player has made their move!");

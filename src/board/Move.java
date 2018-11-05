@@ -1,5 +1,6 @@
 package board;
 
+import java.lang.Math;
 import board.Board.Builder;
 import pieces.Pawn;
 import pieces.Piece;
@@ -79,7 +80,130 @@ public abstract class Move {
         return null;
     }
     
-    public Board execute() {
+    public boolean attackSuccess(Piece aPiece, Piece dPiece){
+        int roll = roll();
+        String attPiece = aPiece.toString();
+        String defPiece = dPiece.toString();
+        System.out.println("You rolled a " + roll +".");
+        
+        if (attPiece.equals("P")){ //attacking piece is a pawn
+            if (defPiece.equals("P")){
+                if (roll >= 4){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else if(defPiece.equals("N")){
+                if (roll >= 5){
+                    return true;
+                }else{
+                    return false;                    
+                }
+            }else{
+                if (roll >= 6){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }else if (attPiece.equals("N")){//attacking piece is a knight
+            if (defPiece.equals("P")){
+                if (roll >= 3){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else if (defPiece.equals("N")){
+                if (roll >= 4){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else if (defPiece.equals("B") || defPiece.equals("R")){
+                if (roll >= 5){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                if (roll >= 6){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }else if (attPiece.equals("B") || attPiece.equals("R")){ //attack piece is a bishop or rook
+            if (defPiece.equals("P")){
+                if (roll >= 2){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else if (defPiece.equals("N")){
+                if (roll >= 3){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else if (defPiece.equals("B") || defPiece.equals("R")){
+                if (roll >= 4){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                if (roll >= 5){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }else{ //attacking piece is a queen or king
+            if (defPiece.equals("P")){
+                return true;
+            }else if (defPiece.equals("N")){
+                if (roll >= 2){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else if (defPiece.equals("B") || defPiece.equals("R")){
+                if (roll >= 3){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                if (roll >= 4){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+    }
+    
+    public void doMoveCount(Builder builder, boolean trueMove){
+        if (trueMove){
+            if (this.board.getMoveCount() == 0){
+                builder.setMoveCount(1);
+                builder.setMoveMaker(this.board.currentPlayer().getAlliance());//gives turn to current player
+            }
+            else{
+                builder.setMoveCount(0);
+                builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());//gives turn to enemy 
+            }
+        }else{
+            builder.setMoveCount(this.board.getMoveCount());
+            builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
+        }
+    }
+    
+    public int roll(){
+        return (int)(Math.random()*6) + 1;
+    }
+    
+    public Board execute(boolean trueMove) {     
         final Builder builder = new Builder();
         for (final Piece piece : this.board.currentPlayer().getActivePieces()) {
             if (!this.movedPiece.equals(piece)) {
@@ -89,9 +213,21 @@ public abstract class Move {
         for (final Piece piece : this.board.currentPlayer().getOpponent().getActivePieces()) {
             builder.setPiece(piece);
         }
-        builder.setPiece(this.movedPiece.movePiece(this)); //moves the moved piece
-        builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());//gives turn to enemy 
-      
+        if (isAttack() && trueMove){ //AI will consider each move a success and skip this step
+            
+            if (!attackSuccess(getMovedPiece(), getAttackedPiece())) //if the attack fails
+            {
+                builder.setPiece(this.movedPiece); //the moved piece stays in place
+                System.out.println("Failed attack.");
+            }else{
+                builder.setPiece(this.movedPiece.movePiece(this)); //moves the moved piece
+                System.out.println("Successful attack.");
+            }
+        }else{
+            builder.setPiece(this.movedPiece.movePiece(this)); //moves the moved piece
+        }
+        
+        doMoveCount(builder, trueMove); //increments move counter
         return builder.build();
     }
     
@@ -235,7 +371,7 @@ public abstract class Move {
         }
         
         @Override
-        public Board execute(){
+        public Board execute(boolean trueMove){
             final Builder builder = new Builder();
             for(final Piece piece : this.board.currentPlayer().getActivePieces()){
                 if(!this.movedPiece.equals(piece)){
@@ -247,8 +383,17 @@ public abstract class Move {
                     builder.setPiece(piece);
                 }
             }
-            builder.setPiece(this.movedPiece.movePiece(this));
-            builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
+            
+            if (!attackSuccess(getMovedPiece(), getAttackedPiece())) //if the attack fails
+            {
+                builder.setPiece(getAttackedPiece()); //put the attack piece into the builder
+                builder.setPiece(this.movedPiece); //the moved piece stays in place
+                System.out.println("Successful attack.");
+            }else{
+                builder.setPiece(this.movedPiece.movePiece(this)); //moves the moved piece
+                System.out.println("Failed attack.");
+            }
+            doMoveCount(builder, trueMove); //increments move counter
             
             return builder.build();
         }
@@ -263,7 +408,7 @@ public abstract class Move {
         }   
         
         @Override
-        public Board execute(){
+        public Board execute(boolean trueMove){
             final Builder builder = new Builder();
             for(final Piece piece : this.board.currentPlayer().getActivePieces()){
                 if(!this.movedPiece.equals(piece)){
@@ -276,7 +421,7 @@ public abstract class Move {
             final Pawn movedPawn = (Pawn)this.movedPiece.movePiece(this);
             builder.setPiece(movedPawn);
             builder.setEnPassantPawn(movedPawn);
-            builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
+            doMoveCount(builder, trueMove); //increments move counter
             
             return builder.build();
         }
@@ -315,7 +460,7 @@ public abstract class Move {
         }
         
         @Override
-        public Board execute(){    
+        public Board execute(boolean trueMove){    
             final Builder builder = new Builder();
             for(final Piece piece : this.board.currentPlayer().getActivePieces()){
                 if(!this.movedPiece.equals(piece) && !this.castleRook.equals(piece)){
@@ -328,7 +473,7 @@ public abstract class Move {
             builder.setPiece(this.movedPiece.movePiece(this));
             builder.setPiece(new Rook(this.castleRook.getPieceAlliance(), this.castleRookDestination));
             //todo look into the first move on normal piece
-            builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
+            doMoveCount(builder, trueMove); //increments move counter
             
             return builder.build();
         }
@@ -406,7 +551,7 @@ public abstract class Move {
         }  
         
         @Override
-        public Board execute(){
+        public Board execute(boolean trueMove){
             throw new RuntimeException("cannot execute the null move!");
         }
         
