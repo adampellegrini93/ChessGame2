@@ -198,21 +198,18 @@ public class Table extends Observable{
         @Override
         public void update(final Observable o,final Object o1) {
             
-            if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer()) &&
-                    !Table.get().getGameBoard().currentPlayer().isInCheckMate() &&
-                    !Table.get().getGameBoard().currentPlayer().isInStaleMate()) {
+            if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer())) {
                 //create an AI thread and execute it
                 final AIThinkTank thinkTank = new AIThinkTank();
                 thinkTank.execute();
             }
             
-            if(Table.get().getGameBoard().currentPlayer().isInCheckMate()){
-                JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over "+ Table.get().getGameBoard().currentPlayer() + " is in checkmate!", 
+            if(Table.get().getGameBoard().currentPlayer().kingTaken()){
+                JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over, "+ Table.get().getGameBoard().currentPlayer() + "'s king was taken!", 
                         "Game Over", JOptionPane.INFORMATION_MESSAGE);
             }
-            
-            if(Table.get().getGameBoard().currentPlayer().isInStaleMate()){
-                JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over "+ Table.get().getGameBoard().currentPlayer() + " is in stalemate!", 
+            else if (Table.get().getGameBoard().currentPlayer().getOpponent().kingTaken()){
+                JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over, "+ Table.get().getGameBoard().currentPlayer().getOpponent() + "'s king was taken!", 
                         "Game Over", JOptionPane.INFORMATION_MESSAGE);
             }
         }     
@@ -267,9 +264,13 @@ public class Table extends Observable{
             try {
                 final Move bestMove = get();
                 Table.get().updateComputerMove(bestMove);
-                //Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove, true).getTransitionBoard());
-                Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove).getTransitionBoard());
-                System.out.println(Table.get().getGameBoard().currentPlayer().getOpponent().toString() + " player has made their move!");
+                Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove, true).getTransitionBoard());
+                if(Table.get().getGameBoard().getMoveCount() == 1){
+                    System.out.println(Table.get().getGameBoard().currentPlayer().toString() + " player has made their first move!");
+                }
+                else{
+                    System.out.println(Table.get().getGameBoard().currentPlayer().getOpponent().toString() + " player has made their second move!");
+                }
                 Table.get().getMoveLog().addMove(bestMove);
                 Table.get().getGameHistoryPanel().redo(Table.get().getGameBoard(), Table.get().getMoveLog());
                 Table.get().getTakenPiecesPanel().redo(Table.get().getMoveLog());
@@ -406,8 +407,7 @@ public class Table extends Observable{
                             destinationTile = chessBoard.getTile(tileID);
                             final Move move = MoveFactory.createMove(chessBoard, 
                                     sourceTile.getTileCoordinate(), destinationTile.getTileCoordinate());
-                            //final MoveTransition transition = chessBoard.currentPlayer().makeMove(move, true);
-                            final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
+                            final MoveTransition transition = chessBoard.currentPlayer().makeMove(move, true);
                             if(transition.getMoveStatus().isDone()){
                                 if(info.isVisible()){
                                     info.addText(chessBoard.currentPlayer().toString()+" player has made their move!");
@@ -425,11 +425,14 @@ public class Table extends Observable{
                                 gameHistoryPanel.redo(chessBoard, moveLog);
                                 takenPiecesPanel.redo(moveLog);
                                 
+                                boardPanel.drawBoard(chessBoard);
+                                
                                 if(gameSetup.isAIPlayer(chessBoard.currentPlayer())){
                                     Table.get().moveMadeUpdate(PlayerType.HUMAN);
                                 }
-                                
-                                boardPanel.drawBoard(chessBoard);
+                                else{
+                                    Table.get().moveMadeUpdate(PlayerType.HUMAN);
+                                }
                             }
                         });
                     }                                         

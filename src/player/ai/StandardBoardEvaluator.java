@@ -6,7 +6,7 @@ import player.Player;
 
 public final class StandardBoardEvaluator implements BoardEvaluator {
 
-    private static final int CHECK_MATE_BONUS = 10000;
+    private static final int TAKE_KING_BONUS = 10000;
     private static final int DEPTH_BONUS = 100;
     private static final int CASTLE_BONUS = 60;
     
@@ -22,15 +22,15 @@ public final class StandardBoardEvaluator implements BoardEvaluator {
 
     private int scorePlayer(final Board board, final Player player, final int depth) { //returns players current score
         return pieceValue(player) + mobility(player) + //takes into account mobility of player and if their in checkmate or castled
-                checkmate(player, depth) + castled(player); 
+                takeKing(player, depth) + castled(player); 
     }
     
     private static int castled(Player player){
         return player.isCastled() ? CASTLE_BONUS : 0;
     }
     
-    private static int checkmate(final Player player, int depth){
-        return player.getOpponent().isInCheckMate() ? CHECK_MATE_BONUS * depthBonus(depth): 0;
+    private static int takeKing(final Player player, int depth){
+        return player.canTakeKing() ? TAKE_KING_BONUS * depthBonus(depth): 0;
     }
     
     private static int depthBonus(int depth) {
@@ -50,9 +50,9 @@ public final class StandardBoardEvaluator implements BoardEvaluator {
         return pieceValueScore;
     }
     
+    
     public static boolean isEndGame(final Board board){
-        return board.currentPlayer().isInCheckMate() ||
-                board.currentPlayer().isInStaleMate();
+        return (board.currentPlayer().kingTaken() || board.currentPlayer().getOpponent().kingTaken());
     }
     
 }

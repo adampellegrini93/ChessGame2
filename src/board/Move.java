@@ -80,11 +80,13 @@ public abstract class Move {
         return null;
     }
     
-/*    public boolean attackSuccess(Piece aPiece, Piece dPiece){
+    public boolean attackSuccess(Piece aPiece, Piece dPiece){
         int roll = roll();
         String attPiece = aPiece.toString();
         String defPiece = dPiece.toString();
-        System.out.println("You rolled a " + roll +".");
+        System.out.println(this.board.currentPlayer().toString() + " rolled a " + roll +" when attacking a " + 
+                this.board.currentPlayer().getOpponent().toString() + " " + defPiece + " piece with a " +
+                this.board.currentPlayer().toString() + " " + attPiece + " piece.");
         
         if (attPiece.equals("P")){ //attacking piece is a pawn
             if (defPiece.equals("P")){
@@ -201,10 +203,9 @@ public abstract class Move {
     
     public int roll(){
         return (int)(Math.random()*6) + 1;
-    } */
+    } 
     
-    //public Board execute(boolean trueMove) {
-    public Board execute(){
+    public Board execute(boolean trueMove) {
         final Builder builder = new Builder();
         for (final Piece piece : this.board.currentPlayer().getActivePieces()) {
             if (!this.movedPiece.equals(piece)) {
@@ -214,8 +215,8 @@ public abstract class Move {
         for (final Piece piece : this.board.currentPlayer().getOpponent().getActivePieces()) {
             builder.setPiece(piece);
         }
-        /*if (isAttack() && trueMove){ //AI will consider each move a success and skip this
-            System.out.println("Why?");
+        if (isAttack() && trueMove){ //AI will consider each move a success and skip this
+            
             if (!attackSuccess(getMovedPiece(), getAttackedPiece())) //if the attack fails
             {
                 builder.setPiece(this.movedPiece); //the moved piece stays in place
@@ -229,9 +230,7 @@ public abstract class Move {
         }
         
         doMoveCount(builder, trueMove); //increments move counter
-         */
-        builder.setPiece(this.movedPiece.movePiece(this)); //moves the moved piece
-        builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());//gives turn to enemy 
+
         return builder.build();
     } 
     
@@ -375,8 +374,7 @@ public abstract class Move {
         }
         
         @Override
-        //public Board execute(boolean trueMove){
-        public Board execute(){
+        public Board execute(boolean trueMove){
             final Builder builder = new Builder();
             for(final Piece piece : this.board.currentPlayer().getActivePieces()){
                 if(!this.movedPiece.equals(piece)){
@@ -389,7 +387,7 @@ public abstract class Move {
                 }
             }
             
-            /*if (!attackSuccess(getMovedPiece(), getAttackedPiece())) //if the attack fails
+            if (!attackSuccess(getMovedPiece(), getAttackedPiece())) //if the attack fails
             {
                 builder.setPiece(getAttackedPiece()); //put the attack piece into the builder
                 builder.setPiece(this.movedPiece); //the moved piece stays in place
@@ -398,9 +396,8 @@ public abstract class Move {
                 builder.setPiece(this.movedPiece.movePiece(this)); //moves the moved piece
                 System.out.println("Failed attack.");
             }
-            doMoveCount(builder, trueMove); //increments move counter*/
-            builder.setPiece(this.movedPiece.movePiece(this));
-            builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
+            
+            doMoveCount(builder, trueMove); //increments move counter
             
             return builder.build();
         }
@@ -415,8 +412,7 @@ public abstract class Move {
         }   
         
         @Override
-        //public Board execute(boolean trueMove){
-        public Board execute(){
+        public Board execute(boolean trueMove){
             final Builder builder = new Builder();
             for(final Piece piece : this.board.currentPlayer().getActivePieces()){
                 if(!this.movedPiece.equals(piece)){
@@ -429,8 +425,7 @@ public abstract class Move {
             final Pawn movedPawn = (Pawn)this.movedPiece.movePiece(this);
             builder.setPiece(movedPawn);
             builder.setEnPassantPawn(movedPawn);
-            builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
-            //doMoveCount(builder, trueMove); //increments move counter
+            doMoveCount(builder, trueMove); //increments move counter
             
             return builder.build();
         }
@@ -469,8 +464,7 @@ public abstract class Move {
         }
         
         @Override
-        //public Board execute(boolean trueMove){ 
-        public Board execute(){
+        public Board execute(boolean trueMove){ 
             final Builder builder = new Builder();
             for(final Piece piece : this.board.currentPlayer().getActivePieces()){
                 if(!this.movedPiece.equals(piece) && !this.castleRook.equals(piece)){
@@ -483,8 +477,7 @@ public abstract class Move {
             builder.setPiece(this.movedPiece.movePiece(this));
             builder.setPiece(new Rook(this.castleRook.getPieceAlliance(), this.castleRookDestination));
             //todo look into the first move on normal piece
-            //doMoveCount(builder, trueMove); //increments move counter
-            builder.setMoveMaker(this.board.currentPlayer().getOpponent().getAlliance());
+            doMoveCount(builder, trueMove); //increments move counter
             
             return builder.build();
         }
@@ -562,8 +555,8 @@ public abstract class Move {
         }  
         
         @Override
-        //public Board execute(boolean trueMove){
-        public Board execute(){
+        public Board execute(boolean trueMove){
+ 
             throw new RuntimeException("cannot execute the null move!");
         }
         
