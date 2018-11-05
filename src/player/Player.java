@@ -72,10 +72,11 @@ public abstract class Player {
     public boolean isInStaleMate(){
         return !this.isInCheck && !hasEscapeMoves();
     }
-       
+    
     protected boolean hasEscapeMoves(){
         for(final Move move : this.legalMoves){
-            final MoveTransition transition = makeMove(move, false);
+            //final MoveTransition transition = makeMove(move, false);
+            final MoveTransition transition = makeMove(move);
             if(transition.getMoveStatus().isDone()){
                 return true;
             } 
@@ -87,12 +88,14 @@ public abstract class Player {
         return false;
     }
     
-    public MoveTransition makeMove(final Move move, boolean trueMove){ //trueMove indicates that the move can potentially effect the board)
+    //public MoveTransition makeMove(final Move move, boolean trueMove){ //trueMove indicates that the move can potentially effect the board)
+    public MoveTransition makeMove(final Move move){
         if(!this.legalMoves.contains(move)){
             return new MoveTransition(this.board, move, MoveStatus.ILLEGAL_MOVE);
         }
         
-        final Board transitionBoard = move.execute(trueMove);
+        //final Board transitionBoard = move.execute(trueMove);
+        final Board transitionBoard = move.execute();
         
         final Collection<Move> kingAttacks = Player.calculateAttacksOnTile(transitionBoard.currentPlayer().getOpponent().getPlayerKing().getPiecePosition(),
                 transitionBoard.currentPlayer().getLegalMoves());

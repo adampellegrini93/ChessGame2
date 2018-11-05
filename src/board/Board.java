@@ -29,7 +29,7 @@ public class Board {
     private final WhitePlayer whitePlayer;
     private final BlackPlayer blackPlayer;
     private final Player currentPlayer;
-    private int moveCount;
+    //private int moveCount;
     
     private final Pawn enPassantPawn;
     
@@ -43,7 +43,7 @@ public class Board {
         this.whitePlayer = new WhitePlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
         this.blackPlayer = new BlackPlayer(this, whiteStandardLegalMoves, blackStandardLegalMoves);
         this.currentPlayer = builder.nextMoveMaker.choosePlayer(this.whitePlayer, this.blackPlayer);
-        this.moveCount = builder.moveCount;
+        //this.moveCount = builder.moveCount;
     }
     
     @Override
@@ -83,9 +83,9 @@ public class Board {
         return this.whitePieces;
     }
     
-    public int getMoveCount(){
+    /*public int getMoveCount(){
         return moveCount;
-    }
+    }*/
     
     private Collection<Move> calculateLegalMoves(final Collection<Piece> pieces) { 
         return pieces.stream().flatMap(piece -> piece.calculateLegalMoves(this).stream()).collect(Collectors.toList());
@@ -156,7 +156,7 @@ public class Board {
         builder.setPiece(new Rook(Alliance.White,63));
 
         builder.setMoveMaker(Alliance.White);
-        builder.setMoveCount(0);
+        //builder.setMoveCount(0);
 
         return builder.build();
     }
@@ -174,7 +174,7 @@ public class Board {
         Alliance nextMoveMaker;
         Pawn enPassantPawn;
         Move transitionMove;
-        int moveCount;
+        //int moveCount;
         
         public Builder(){
             this.boardConfig = new HashMap<>();
@@ -195,10 +195,10 @@ public class Board {
             return this;
         }
         
-        public Builder setMoveCount(final int moveCount){
+        /*public Builder setMoveCount(final int moveCount){
             this.moveCount = moveCount;
             return this;
-        }
+        }*/
         
         public Board build() {
             return new Board(this);

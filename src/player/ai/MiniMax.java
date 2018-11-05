@@ -39,7 +39,8 @@ public class MiniMax implements MoveStrategy{
         
         for(final Move move : board.currentPlayer().getLegalMoves()){
             
-            final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false);
+            //final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false);
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
             if(moveTransition.getMoveStatus().isDone()){
                 
                 currentValue = board.currentPlayer().getAlliance().isWhite() ?  
@@ -95,7 +96,8 @@ public class MiniMax implements MoveStrategy{
         
         int lowestSeenValue = Integer.MAX_VALUE; //starts with highest possible value
         for(final Move move : board.currentPlayer().getLegalMoves()){ //goes through each possible move at current layer
-            final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false); //makes each move possible
+            //final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false); //makes each move possible
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
             if(moveTransition.getMoveStatus().isDone()){
                 final int currentValue = max(moveTransition.getTransitionBoard(), depth -1);
                 if(currentValue <= lowestSeenValue){
@@ -119,7 +121,8 @@ public class MiniMax implements MoveStrategy{
         
         int highestSeenValue = Integer.MIN_VALUE; //starts with smallest possible value
         for(final Move move : board.currentPlayer().getLegalMoves()){ //goes through each possible move at current layer
-            final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false); //makes each move possible
+            //final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false); //makes each move possible
+            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
             if(moveTransition.getMoveStatus().isDone()){
                 final int currentValue = min(moveTransition.getTransitionBoard(), depth -1);
                 if(currentValue >= highestSeenValue){
