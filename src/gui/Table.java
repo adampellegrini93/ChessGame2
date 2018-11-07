@@ -38,9 +38,9 @@ import player.ai.MoveStrategy;
 public class Table extends Observable{
     
     private final JFrame gameFrame;
-    //private final GameHistoryPanel gameHistoryPanel;
+    private final GameHistoryPanel gameHistoryPanel;
     private final BoardPanel boardPanel;
-    //private final TakenPiecesPanel takenPiecesPanel;
+    private final TakenPiecesPanel takenPiecesPanel;
     private final MoveLog moveLog;
     private final GameSetup gameSetup;
     private final InfoOutput info;
@@ -68,8 +68,8 @@ public class Table extends Observable{
         this.gameFrame.setJMenuBar(tableMenuBar);
         this.gameFrame.setSize(OUTER_FRAME_DIMENSION);
         this.chessBoard = Board.createStandardBoard();
-        //this.gameHistoryPanel = new GameHistoryPanel();
-        //this.takenPiecesPanel = new TakenPiecesPanel();
+        this.gameHistoryPanel = new GameHistoryPanel();
+        this.takenPiecesPanel = new TakenPiecesPanel();
         this.info = new InfoOutput();
         this.highlightLegalMoves = true;
         this.boardPanel = new BoardPanel();
@@ -77,9 +77,9 @@ public class Table extends Observable{
         this.addObserver(new TableGameAIWatcher());
         this.gameSetup = new GameSetup(this.gameFrame, true);
         this.boardDirection = BoardDirection.NORMAL;
-        //this.gameFrame.add(this.takenPiecesPanel,BorderLayout.WEST);
+        this.gameFrame.add(this.takenPiecesPanel,BorderLayout.WEST);
         this.gameFrame.add(this.boardPanel,BorderLayout.CENTER);
-        //this.gameFrame.add(this.gameHistoryPanel, BorderLayout.EAST);
+        this.gameFrame.add(this.gameHistoryPanel, BorderLayout.EAST);
         this.gameFrame.setLocationRelativeTo(null);
         this.gameFrame.setVisible(true);
         
@@ -97,7 +97,7 @@ public class Table extends Observable{
     
     public void show(){
         Table.get().getMoveLog().clear();
-        //Table.get().getGameHistoryPanel().redo(chessBoard, Table.get().moveLog);
+        Table.get().getGameHistoryPanel().redo(chessBoard, Table.get().moveLog);
         Table.get().getBoardPanel().drawBoard(Table.get().getGameBoard());
     }
     
@@ -227,13 +227,13 @@ public class Table extends Observable{
         return this.moveLog;
     }
     
-    /*private GameHistoryPanel getGameHistoryPanel(){
+    private GameHistoryPanel getGameHistoryPanel(){
         return this.gameHistoryPanel;
     }
     
     private TakenPiecesPanel getTakenPiecesPanel(){
         return this.takenPiecesPanel;
-    }*/
+    }
     
     private BoardPanel getBoardPanel(){
         return this.boardPanel;
@@ -262,22 +262,20 @@ public class Table extends Observable{
         public void done(){
             
             try {
-                if (!(Table.get().getGameBoard().currentPlayer().kingTaken() || Table.get().getGameBoard().currentPlayer().getOpponent().kingTaken())){//prevents game from continuing if already ended
-                    final Move bestMove = get();
-                    Table.get().updateComputerMove(bestMove);
-                    Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove, true).getTransitionBoard());
-                    if(Table.get().getGameBoard().getMoveCount() == 1){
-                        System.out.println(Table.get().getGameBoard().currentPlayer().toString() + " player has made their first move!");
-                    }
-                    else{
-                        System.out.println(Table.get().getGameBoard().currentPlayer().getOpponent().toString() + " player has made their second move!");
-                    }
-                    Table.get().getMoveLog().addMove(bestMove);
-                    //Table.get().getGameHistoryPanel().redo(Table.get().getGameBoard(), Table.get().getMoveLog());
-                    //Table.get().getTakenPiecesPanel().redo(Table.get().getMoveLog());
-                    Table.get().getBoardPanel().drawBoard(Table.get().getGameBoard());
-                    Table.get().moveMadeUpdate(PlayerType.COMPUTER);  
-                    }
+                final Move bestMove = get();
+                Table.get().updateComputerMove(bestMove);
+                Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove, true).getTransitionBoard());
+                if(Table.get().getGameBoard().getMoveCount() == 1){
+                    System.out.println(Table.get().getGameBoard().currentPlayer().toString() + " player has made their first move!");
+                }
+                else{
+                    System.out.println(Table.get().getGameBoard().currentPlayer().getOpponent().toString() + " player has made their second move!");
+                }
+                Table.get().getMoveLog().addMove(bestMove);
+                Table.get().getGameHistoryPanel().redo(Table.get().getGameBoard(), Table.get().getMoveLog());
+                Table.get().getTakenPiecesPanel().redo(Table.get().getMoveLog());
+                Table.get().getBoardPanel().drawBoard(Table.get().getGameBoard());
+                Table.get().moveMadeUpdate(PlayerType.COMPUTER);  
             } catch (InterruptedException ex) {
                 Logger.getLogger(Table.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ExecutionException ex) {
@@ -424,8 +422,8 @@ public class Table extends Observable{
                         }
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
-                                //gameHistoryPanel.redo(chessBoard, moveLog);
-                                //takenPiecesPanel.redo(moveLog);
+                                gameHistoryPanel.redo(chessBoard, moveLog);
+                                takenPiecesPanel.redo(moveLog);
                                 
                                 boardPanel.drawBoard(chessBoard);
                                 
