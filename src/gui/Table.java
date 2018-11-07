@@ -109,6 +109,10 @@ public class Table extends Observable{
         return this.chessBoard;
     }
     
+    private JFrame getGameFrame(){
+        return this.gameFrame;
+    }
+    
     //creates and loads all of the menu bars
     private JMenuBar createTableMenuBar(){
         final JMenuBar tableMenuBar = new JMenuBar();
@@ -129,13 +133,23 @@ public class Table extends Observable{
             }
         });
         fileMenu.add(openPGN);
+        fileMenu.addSeparator();
         
+        final JMenuItem newGameMenuItem = new JMenuItem("New Game");
+        newGameMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                
+            }
+        });
+        fileMenu.add(newGameMenuItem);
         fileMenu.addSeparator();
         
         final JMenuItem exitMenuItem = new JMenuItem("Exit");
         exitMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
+                Table.get().getGameFrame().dispose();
                 System.exit(0);
             }
         });
@@ -396,7 +410,7 @@ public class Table extends Observable{
                         sourceTile = null;
                         destinationTile = null;
                         humanMovedPiece = null;                       
-                    }else if(isLeftMouseButton(me)){
+                    }else if(isLeftMouseButton(me) && !gameSetup.isAIPlayer(chessBoard.currentPlayer())){
                         if(sourceTile == null){
                             sourceTile = chessBoard.getTile(tileID);
                             humanMovedPiece = sourceTile.getPiece();
@@ -473,10 +487,23 @@ public class Table extends Observable{
         private void assignTilePieceIcon(final Board board){
             this.removeAll();
             if(board.getTile(this.tileId).isTileOccupied()){
-                String pieceImage = board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0,1)
-                        + board.getTile(this.tileId).toString().toUpperCase() + ".png";
-                JLabel label = new JLabel(new ImageIcon(getClass().getResource("/images/pieces/" + pieceImage)));
-                add(label);
+                if(board.getTile(this.tileId).getPiece() == humanMovedPiece && humanMovedPiece != null && 
+                        humanMovedPiece.getPieceAlliance() == board.currentPlayer().getAlliance()){
+                String pieceImage2 = humanMovedPiece.getPieceAlliance().toString().substring(0,1)
+                                    + humanMovedPiece.toString().toUpperCase() + ".png";
+                                JLabel label11 = new JLabel(new ImageIcon(getClass().getResource("/images/pieces/" + pieceImage2)));
+                                label11.setLayout(new BorderLayout());
+                                add(label11);
+                                JLabel label22 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/square.png")));
+                                label22.setHorizontalAlignment(JLabel.CENTER);
+                                label11.add(label22);
+                                setVisible(true);
+                }else{ 
+                    String pieceImage = board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0,1)
+                            + board.getTile(this.tileId).toString().toUpperCase() + ".png";
+                    JLabel label = new JLabel(new ImageIcon(getClass().getResource("/images/pieces/" + pieceImage)));
+                    add(label);
+                }
             }
         }
         
