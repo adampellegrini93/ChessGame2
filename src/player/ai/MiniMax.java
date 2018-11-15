@@ -43,8 +43,8 @@ public class MiniMax implements MoveStrategy{
             if(moveTransition.getMoveStatus().isDone()){
                 
                 currentValue = board.currentPlayer().getAlliance().isWhite() ?  
-                        min(moveTransition.getTransitionBoard(), this.searchDepth -1) : //white is maximizing player
-                        max(moveTransition.getTransitionBoard(), this.searchDepth -1); //black is the maximizing player
+                        min(moveTransition.getTransitionBoard(), this.searchDepth -1, highestSeenValue) : //white is maximizing player
+                        max(moveTransition.getTransitionBoard(), this.searchDepth -1, lowestSeenValue); //black is the maximizing player
                 
                 if(board.currentPlayer().getAlliance().isWhite() && currentValue >= highestSeenValue){ //white wants highest seen score
                         //highestSeenValue = currentValue;
@@ -87,17 +87,23 @@ public class MiniMax implements MoveStrategy{
         return bestMove;
     }
     
-    public int min(final Board board, final int depth){
+    public int min(final Board board, final int depth, int prevScore){
+        
+        int newScore = this.boardEvaluator.evaluate(board, depth); //calculate the board's score
         
         if(depth == 0 || isEndGameScenario(board)){ //if finished evaluating or game over
-            return this.boardEvaluator.evaluate(board, depth);
+            //return this.boardEvaluator.evaluate(board, depth);
+            return newScore; //stops looking deeper in current branch
+        }else if(newScore <= prevScore){ //if min's newScore is lower than max's score
+            return newScore; //stops looking deeper in current branch
         }
+
         
         int lowestSeenValue = Integer.MAX_VALUE; //starts with highest possible value
         for(final Move move : board.currentPlayer().getLegalMoves()){ //goes through each possible move at current layer
             final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false); //makes each move possible
             if(moveTransition.getMoveStatus().isDone()){
-                final int currentValue = max(moveTransition.getTransitionBoard(), depth -1);
+                final int currentValue = max(moveTransition.getTransitionBoard(), depth -1, newScore);
                 if(currentValue <= lowestSeenValue){
                     lowestSeenValue = currentValue; //record lowest value seen in all possible moves
                 }
@@ -110,17 +116,22 @@ public class MiniMax implements MoveStrategy{
         return (board.currentPlayer().kingTaken() || board.currentPlayer().getOpponent().kingTaken());
     }
     
-    public int max(final Board board, final int depth){
+    public int max(final Board board, final int depth, int prevScore){
+        
+        int newScore = this.boardEvaluator.evaluate(board, depth); //calculate the board's score
         
         if(depth == 0 || isEndGameScenario(board)){ //if finished evaluating or game over
-            return this.boardEvaluator.evaluate(board, depth);
+            //return this.boardEvaluator.evaluate(board, depth);
+            return newScore; //stops looking deeper in current branch
+        }else if(newScore >= prevScore){ //if max's newScore is higher than min's score
+            return newScore; //stops looking deeper in current branch
         }
         
         int highestSeenValue = Integer.MIN_VALUE; //starts with smallest possible value
         for(final Move move : board.currentPlayer().getLegalMoves()){ //goes through each possible move at current layer
             final MoveTransition moveTransition = board.currentPlayer().makeMove(move, false); //makes each move possible
             if(moveTransition.getMoveStatus().isDone()){
-                final int currentValue = min(moveTransition.getTransitionBoard(), depth -1);
+                final int currentValue = min(moveTransition.getTransitionBoard(), depth -1, newScore);
                 if(currentValue >= highestSeenValue){
                     highestSeenValue = currentValue; //record highest value seen in all possible moves
                 }
