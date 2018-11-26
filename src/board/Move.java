@@ -80,8 +80,9 @@ public abstract class Move {
         return null;
     }
     
-    public boolean attackSuccess(Piece aPiece, Piece dPiece){
+    public boolean attackSuccess(Builder builder, Piece aPiece, Piece dPiece){
         int roll = roll();
+        builder.setLastRoll(roll);
         String attPiece = aPiece.toString();
         String defPiece = dPiece.toString();
         System.out.println(this.board.currentPlayer().toString() + " rolled a " + roll +" when attacking a " + 
@@ -217,7 +218,7 @@ public abstract class Move {
         }
         if (isAttack() && trueMove){ //AI will consider each move a success and skip this
             
-            if (!attackSuccess(getMovedPiece(), getAttackedPiece())) //if the attack fails
+            if (!attackSuccess(builder, getMovedPiece(), getAttackedPiece())) //if the attack fails
             {
                 builder.setPiece(this.movedPiece); //the moved piece stays in place
                 System.out.println("Failed attack.");
@@ -387,7 +388,7 @@ public abstract class Move {
                 }
             }
             
-            if (!attackSuccess(getMovedPiece(), getAttackedPiece())) //if the attack fails
+            if (!attackSuccess(builder, getMovedPiece(), getAttackedPiece())) //if the attack fails
             {
                 builder.setPiece(getAttackedPiece()); //put the attack piece into the builder
                 builder.setPiece(this.movedPiece); //the moved piece stays in place

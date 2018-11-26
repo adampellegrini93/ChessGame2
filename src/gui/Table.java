@@ -39,6 +39,7 @@ public class Table extends Observable{
     
     private final JFrame gameFrame;
     private final GameHistoryPanel gameHistoryPanel;
+    private final GameRollPanel gameRollPanel;
     private final BoardPanel boardPanel;
     private final TakenPiecesPanel takenPiecesPanel;
     private final MoveLog moveLog;
@@ -69,6 +70,7 @@ public class Table extends Observable{
         this.gameFrame.setSize(OUTER_FRAME_DIMENSION);
         this.chessBoard = Board.createStandardBoard();
         this.gameHistoryPanel = new GameHistoryPanel();
+        this.gameRollPanel = new GameRollPanel();
         this.takenPiecesPanel = new TakenPiecesPanel();
         this.info = new InfoOutput();
         this.highlightLegalMoves = true;
@@ -79,7 +81,7 @@ public class Table extends Observable{
         this.boardDirection = BoardDirection.NORMAL;
         this.gameFrame.add(this.takenPiecesPanel,BorderLayout.WEST);
         this.gameFrame.add(this.boardPanel,BorderLayout.CENTER);
-        this.gameFrame.add(this.gameHistoryPanel, BorderLayout.EAST);
+        this.gameFrame.add(this.gameRollPanel, BorderLayout.EAST);
         this.gameFrame.setLocationRelativeTo(null);
         this.gameFrame.setVisible(true);
         
@@ -98,6 +100,8 @@ public class Table extends Observable{
     public void show(){
         Table.get().getMoveLog().clear();
         Table.get().getGameHistoryPanel().redo(chessBoard, Table.get().moveLog);
+        Table.get().getGameRollPanel().turn(Table.get().getGameBoard().getMoveCount(), Table.get().getGameBoard().currentPlayer().toString());
+        Table.get().getGameRollPanel().changeDie(Table.get().getGameBoard().getLastRoll());
         Table.get().getBoardPanel().drawBoard(Table.get().getGameBoard());
     }
     
@@ -215,7 +219,8 @@ public class Table extends Observable{
             if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer())) {
                 //create an AI thread and execute it
                 final AIThinkTank thinkTank = new AIThinkTank();
-                thinkTank.execute();
+                if(!Table.get().getGameBoard().currentPlayer().kingTaken() && !Table.get().getGameBoard().currentPlayer().getOpponent().kingTaken()) //prevents ai from continuing when game ends
+                    thinkTank.execute();
             }
             
             if(Table.get().getGameBoard().currentPlayer().kingTaken()){
@@ -243,6 +248,10 @@ public class Table extends Observable{
     
     private GameHistoryPanel getGameHistoryPanel(){
         return this.gameHistoryPanel;
+    }
+    
+    private GameRollPanel getGameRollPanel(){
+        return this.gameRollPanel;
     }
     
     private TakenPiecesPanel getTakenPiecesPanel(){
@@ -287,6 +296,8 @@ public class Table extends Observable{
                 }
                 Table.get().getMoveLog().addMove(bestMove);
                 Table.get().getGameHistoryPanel().redo(Table.get().getGameBoard(), Table.get().getMoveLog());
+                Table.get().getGameRollPanel().turn(Table.get().getGameBoard().getMoveCount(), Table.get().getGameBoard().currentPlayer().toString());
+                Table.get().getGameRollPanel().changeDie(Table.get().getGameBoard().getLastRoll());
                 Table.get().getTakenPiecesPanel().redo(Table.get().getMoveLog());
                 Table.get().getBoardPanel().drawBoard(Table.get().getGameBoard());
                 Table.get().moveMadeUpdate(PlayerType.COMPUTER);  
@@ -410,7 +421,10 @@ public class Table extends Observable{
                         sourceTile = null;
                         destinationTile = null;
                         humanMovedPiece = null;                       
-                    }else if(isLeftMouseButton(me) && !gameSetup.isAIPlayer(chessBoard.currentPlayer())){
+                    }else if(isLeftMouseButton(me) && 
+                            !gameSetup.isAIPlayer(chessBoard.currentPlayer()) && 
+                            !chessBoard.currentPlayer().kingTaken() && 
+                            !chessBoard.currentPlayer().getOpponent().kingTaken()){
                         if(sourceTile == null){
                             sourceTile = chessBoard.getTile(tileID);
                             humanMovedPiece = sourceTile.getPiece();
@@ -428,6 +442,8 @@ public class Table extends Observable{
                                     info.addText("It is now " + chessBoard.currentPlayer().getOpponent().toString()+ " playes turn!");
                                 }
                                 chessBoard = transition.getTransitionBoard();
+                                Table.get().getGameRollPanel().turn(Table.get().getGameBoard().getMoveCount(), Table.get().getGameBoard().currentPlayer().toString());
+                                Table.get().getGameRollPanel().changeDie(Table.get().getGameBoard().getLastRoll());
                                 moveLog.addMove(move);
                             }
                             sourceTile = null;
@@ -517,12 +533,58 @@ public class Table extends Observable{
                             if(board.getTile(this.tileId).getPiece() != null){
                                 String pieceImage = board.getTile(this.tileId).getPiece().getPieceAlliance().toString().substring(0,1)
                                     + board.getTile(this.tileId).toString().toUpperCase() + ".png";
+                                
                                 JLabel label1 = new JLabel(new ImageIcon(getClass().getResource("/images/pieces/" + pieceImage)));
                                 label1.setLayout(new BorderLayout());
+                                label1.setHorizontalAlignment(JLabel.CENTER);
                                 add(label1);
+                                
                                 JLabel label2 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/redX_50x50.png")));
-                                label2.setHorizontalAlignment(JLabel.CENTER);
-                                label1.add(label2);
+                                label2.setLayout(new BorderLayout());
+                                label1.add(label2, BorderLayout.CENTER);
+                                
+                                JLabel label3 = new JLabel();
+                                if (board.getTile(this.tileId).getPiece().toString().equals("P")) //defeding piece is a pawn
+                                    if (move.getMovedPiece().toString().equals("P"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die4_sm.png")));
+                                    else if (move.getMovedPiece().toString().equals("N"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die3_sm.png")));
+                                    else if (move.getMovedPiece().toString().equals("B") || move.getMovedPiece().toString().equals("R"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die2_sm.png")));
+                                    else
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die1_sm.png")));
+                                
+                                else if (board.getTile(this.tileId).getPiece().toString().equals("N")) //defending piece is a knight
+                                    if (move.getMovedPiece().toString().equals("P"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die5_sm.png")));
+                                    else if (move.getMovedPiece().toString().equals("N"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die4_sm.png")));
+                                    else if (move.getMovedPiece().toString().equals("B") || move.getMovedPiece().toString().equals("R"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die3_sm.png")));
+                                    else
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die2_sm.png")));
+                                
+                                else if (board.getTile(this.tileId).getPiece().toString().equals("B") || board.getTile(this.tileId).getPiece().toString().equals("R")) //defending piece is a bishop or rook
+                                    if (move.getMovedPiece().toString().equals("P"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die6_sm.png")));
+                                    else if (move.getMovedPiece().toString().equals("N"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die5_sm.png")));
+                                    else if (move.getMovedPiece().toString().equals("B") || move.getMovedPiece().toString().equals("R"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die4_sm.png")));
+                                    else
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die3_sm.png")));
+                                else //defeding piece is a king or queen
+                                    if (move.getMovedPiece().toString().equals("P") || move.getMovedPiece().toString().equals("N"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die6_sm.png")));
+                                    else if (move.getMovedPiece().toString().equals("B") || move.getMovedPiece().toString().equals("R"))
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die5_sm.png")));
+                                    else
+                                        label3 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die4_sm.png")));
+                                    
+                                label3.setHorizontalAlignment(JLabel.RIGHT);
+                                label3.setVerticalAlignment(JLabel.BOTTOM);
+                                label2.add(label3, BorderLayout.LINE_END);
+                                
                                 setVisible(true);
                             }else{
                                 JLabel label2 = new JLabel(new ImageIcon(getClass().getResource("/images/misc/redX_50x50.png")));

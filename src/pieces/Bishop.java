@@ -14,8 +14,7 @@ import java.util.List;
 
 public class Bishop extends Piece{
 
-    private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = {-9, -7, 7, 9};
-    private final static int[] CANDIDATE_MOVE_COORDINATES = { -8, -1, 1, 8};
+    private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = { -9, -8, -7, -1, 1, 7, 8, 9 };
     public Bishop(final Alliance pieceAlliance, final int piecePosition) {
         super(PieceType.BISHOP, piecePosition, pieceAlliance,true);
     }
@@ -24,12 +23,12 @@ public class Bishop extends Piece{
         super(PieceType.BISHOP, piecePosition, pieceAlliance, isFirstMove);
     }
 
-    @Override
-    public Collection<Move> calculateLegalMoves(final Board board) {   
+    public Collection<Move> calculateLegalMoves(final Board board) {
+        
         final List<Move> legalMoves = new ArrayList<>();
-        //for regualr piece movement ability
+        
         for(final int candidateCoordinateOffset: CANDIDATE_MOVE_VECTOR_COORDINATES) {//loops through legal moves        
-            int candidateDestinationCoordinate = this.piecePosition;
+            int candidateDestinationCoordinate = this.piecePosition;           
             while(BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)){       
                 if(isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset) ||
                     isEighthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)){
@@ -39,7 +38,7 @@ public class Bishop extends Piece{
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
                     if ((candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 5))) &&
                         (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 6))) &&
-                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 7)))){ //do not consider movements greater than 4 spaces
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 7)))){ //do not consider movements greater than 4 spaces   
                         final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
                         if (!candidateDestinationTile.isTileOccupied()) { //if not occupied by another piece currently
                             legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
@@ -55,72 +54,7 @@ public class Bishop extends Piece{
                 }
             }
         }
-        //for fuzzy logic movement ability
-        for(final int currentCandidateOffset : CANDIDATE_MOVE_COORDINATES){
-            int candidateDestinationCoordinate = this.piecePosition + (this.getPieceAlliance().getDirection() * currentCandidateOffset); 
-            
-            if(!BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)){
-                continue;
-            }
-            //for moving backwards
-            if((currentCandidateOffset == -8) &&
-                    ((this.pieceAlliance.isWhite() && !BoardUtils.FIRST_RANK[this.piecePosition]) || 
-                    (this.pieceAlliance.isBlack() && !BoardUtils.EIGHTH_RANK[this.piecePosition]))){
-                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
-                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-                } else {
-                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
-                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
-                    }
-                }
-            }
-            //for moving forward
-            else if((currentCandidateOffset == 8) &&
-                    ((this.pieceAlliance.isWhite() && !BoardUtils.EIGHTH_RANK[this.piecePosition]) || 
-                    (this.pieceAlliance.isBlack() && !BoardUtils.FIRST_RANK[this.piecePosition]))){
-                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
-                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-                } else {
-                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
-                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
-                    }
-                }
-            }
-            //for moving to left
-            else if((currentCandidateOffset == 1) && 
-                    !((BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
-                    (BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
-                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-                } else {
-                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
-                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
-                    }
-                }
-            }
-            //for moving to the right
-            else if((currentCandidateOffset == -1) && 
-                    !((BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
-                    (BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
-                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-                } else {
-                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
-                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
-                    }
-                }
-            }
-        }
         return Collections.unmodifiableList(legalMoves);
-        
     }
     
     @Override
@@ -134,10 +68,10 @@ public class Bishop extends Piece{
     }
     
     private static boolean isFirstColumnExclusion(final int currentPosition, final int candidateOffset){
-        return BoardUtils.FIRST_COLUMN[currentPosition] && (candidateOffset == -9 || candidateOffset == 7);
+        return BoardUtils.FIRST_COLUMN[currentPosition] && (candidateOffset == -1 || candidateOffset == -9 || candidateOffset == 7);
     }
     
     private static boolean isEighthColumnExclusion(final int currentPosition, final int candidateOffset){
-        return BoardUtils.EIGHTH_COLUMN[currentPosition] && (candidateOffset == -7 || candidateOffset == 9);
+        return BoardUtils.EIGHTH_COLUMN[currentPosition] && (candidateOffset == -7 || candidateOffset == 1|| candidateOffset == 9);
     }      
 }

@@ -14,11 +14,9 @@ import java.util.List;
 
 public class Rook extends Piece{
 
-    private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = { -8, -1, 1, 8 };
-    private final static int[] CANDIDATE_MOVE_COORDINATES = {-9, -7, 7, 9};
+    private final static int[] CANDIDATE_MOVE_VECTOR_COORDINATES = { -9, -8, -7, -1, 1, 7, 8, 9 };
     
-    public Rook(final Alliance pieceAlliance, 
-            final int piecePosition) {
+    public Rook(final Alliance pieceAlliance, final int piecePosition) {
         super(PieceType.ROOK, piecePosition, pieceAlliance, true);
     }
     
@@ -26,13 +24,13 @@ public class Rook extends Piece{
         super(PieceType.ROOK, piecePosition, pieceAlliance, isFirstMove);
     }
 
- @Override
+    @Override
     public Collection<Move> calculateLegalMoves(final Board board) {
         
         final List<Move> legalMoves = new ArrayList<>();
-        //for regular piece movement ability
-        for(final int candidateCoordinateOffset: CANDIDATE_MOVE_VECTOR_COORDINATES) {//loops through legal moves         
-            int candidateDestinationCoordinate = this.piecePosition; 
+        
+        for(final int candidateCoordinateOffset: CANDIDATE_MOVE_VECTOR_COORDINATES) {//loops through legal moves        
+            int candidateDestinationCoordinate = this.piecePosition;           
             while(BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)){       
                 if(isFirstColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset) ||
                     isEighthColumnExclusion(candidateDestinationCoordinate, candidateCoordinateOffset)){
@@ -42,7 +40,7 @@ public class Rook extends Piece{
                 if (BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)) {
                     if ((candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 5))) &&
                         (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 6))) &&
-                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 7)))){ //do not consider movements greater than 4 spaces
+                        (candidateDestinationCoordinate != (this.piecePosition + (candidateCoordinateOffset * 7)))){ //do not consider movements greater than 4 spaces   
                         final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
                         if (!candidateDestinationTile.isTileOccupied()) { //if not occupied by another piece currently
                             legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
@@ -58,41 +56,6 @@ public class Rook extends Piece{
                 }
             }
         }
-        //for fuzzy logic move ability
-        for(final int currentCandidateOffset : CANDIDATE_MOVE_COORDINATES){
-            int candidateDestinationCoordinate = this.piecePosition + (this.getPieceAlliance().getDirection() * currentCandidateOffset);
-            if(!BoardUtils.isValidTileCoordinate(candidateDestinationCoordinate)){
-                continue;
-            }
-            //for moving diagnally backwards to the right/and diagnally forward to the right
-            else if((currentCandidateOffset == -9 || currentCandidateOffset == 7) && 
-                    !((BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
-                    (BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
-                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-                } else {
-                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
-                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
-                    }
-                }
-            }
-            //for moving diagnally backwards to the left/ and diagnally forward to the left
-            else if((currentCandidateOffset == -7 || currentCandidateOffset == 9) && 
-                    !((BoardUtils.FIRST_COLUMN[this.piecePosition] && this.pieceAlliance.isWhite() || 
-                    (BoardUtils.EIGHTH_COLUMN[this.piecePosition] && this.pieceAlliance.isBlack())))){
-                if (!board.getTile(candidateDestinationCoordinate).isTileOccupied()) {
-                    legalMoves.add(new MajorMove(board, this, candidateDestinationCoordinate));
-                } else {
-                    final Piece pieceAtDestination = board.getTile(candidateDestinationCoordinate).getPiece();
-                    final Alliance pieceAlliance = pieceAtDestination.getPieceAlliance();
-                    if (this.pieceAlliance != pieceAlliance) { //if on enemy piece
-                        legalMoves.add(new MajorAttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
-                    }
-                }
-            } 
-        }
         return Collections.unmodifiableList(legalMoves);
     }
     @Override
@@ -106,10 +69,10 @@ public class Rook extends Piece{
     }
     
     private static boolean isFirstColumnExclusion(final int currentPosition, final int candidateOffset){
-        return BoardUtils.FIRST_COLUMN[currentPosition] && (candidateOffset == -1);
+        return BoardUtils.FIRST_COLUMN[currentPosition] && (candidateOffset == -1 || candidateOffset == -9 || candidateOffset == 7);
     }
     
     private static boolean isEighthColumnExclusion(final int currentPosition, final int candidateOffset){
-        return BoardUtils.EIGHTH_COLUMN[currentPosition] && (candidateOffset == 1);
+        return BoardUtils.EIGHTH_COLUMN[currentPosition] && (candidateOffset == -7 || candidateOffset == 1|| candidateOffset == 9);
     }
 }
