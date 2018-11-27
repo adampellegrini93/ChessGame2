@@ -148,8 +148,10 @@ public class Table extends Observable{
         newGameMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
+                Table.get().hide(); //NOTE: entire program ends when any exit button is pressed. 
+                                    //Hiding the main pane gives the prevents players from "cancelling" making a new game
+                Table.get().getGameSetup().update(false, true, false, true, 1, 1);  //force ends ai
                 Table.get().updateGameBoard(Board.createStandardBoard());
-                Table.get().hide();
                 StartScreen start = new StartScreen();
                 start.setVisible(true);
             }
