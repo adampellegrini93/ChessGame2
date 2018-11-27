@@ -160,13 +160,13 @@ public class Table extends Observable{
         fileMenu.addSeparator();
         
         final JMenuItem exitMenuItem = new JMenuItem("Exit");
-       // exitMenuItem.addActionListener(new ActionListener() {
-            //@Override
-            //public void actionPerformed(ActionEvent ae) {
-                //Table.get().getGameFrame().dispose();
-                //System.exit(0);
-            //}
-        //});
+        exitMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                Table.get().getGameFrame().dispose();
+                System.exit(0);
+            }
+        });
         fileMenu.add(exitMenuItem);
         
         return fileMenu;

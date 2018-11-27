@@ -42,7 +42,7 @@ public class StartScreen extends javax.swing.JDialog {
         blackDifficultyOptions = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        howToPlayButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         whiteEasyRadioButton = new javax.swing.JRadioButton();
         whiteHardRadioButton = new javax.swing.JRadioButton();
@@ -75,10 +75,10 @@ public class StartScreen extends javax.swing.JDialog {
             }
         });
 
-        jButton2.setText("How To Play");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        howToPlayButton.setText("How To Play");
+        howToPlayButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                howToPlayButtonActionPerformed(evt);
             }
         });
 
@@ -167,7 +167,7 @@ public class StartScreen extends javax.swing.JDialog {
                         .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(153, 153, 153)
-                        .addComponent(jButton2)))
+                        .addComponent(howToPlayButton)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -176,7 +176,7 @@ public class StartScreen extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
+                .addComponent(howToPlayButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -219,12 +219,12 @@ public class StartScreen extends javax.swing.JDialog {
         if(whiteEasyRadioButton.isSelected()){
             whiteDifficulty = 1;
         }else{
-            whiteDifficulty = 3;
+            whiteDifficulty = 2;
         }
         if(blackEasyRadioButton.isSelected()){
             blackDifficulty = 1;
         }else{
-            blackDifficulty = 3;
+            blackDifficulty = 2;
         }
         if(whiteHumanRadioButton.isSelected() && blackHumanRadioButton.isSelected()){
             Table.get().getGameSetup().update(false, true, false, true, whiteDifficulty, blackDifficulty);
@@ -256,9 +256,10 @@ public class StartScreen extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void howToPlayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_howToPlayButtonActionPerformed
+        HowToPlay howTo = new HowToPlay();
+        howTo.setVisible(true);
+    }//GEN-LAST:event_howToPlayButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -304,8 +305,8 @@ public class StartScreen extends javax.swing.JDialog {
     private javax.swing.JRadioButton blackHumanRadioButton;
     private javax.swing.ButtonGroup blackPlayerOptions;
     private javax.swing.JLabel difficultyLabel;
+    private javax.swing.JButton howToPlayButton;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
