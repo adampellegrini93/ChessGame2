@@ -5,7 +5,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import pieces.Alliance;
 
-public class StartScreen extends javax.swing.JFrame {
+public class StartScreen extends javax.swing.JDialog {
 
     private PlayerType whitePlayer;
     private PlayerType blackPlayer;
@@ -57,8 +57,9 @@ public class StartScreen extends javax.swing.JFrame {
         blackEasyRadioButton = new javax.swing.JRadioButton();
         blackHardRadioButton = new javax.swing.JRadioButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(420, 450));
+        setModalExclusionType(java.awt.Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setPreferredSize(new java.awt.Dimension(425, 450));
         setResizable(false);
         setSize(new java.awt.Dimension(425, 450));
@@ -75,6 +76,11 @@ public class StartScreen extends javax.swing.JFrame {
         });
 
         jButton2.setText("How To Play");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Who will play as White?");
@@ -249,6 +255,10 @@ public class StartScreen extends javax.swing.JFrame {
             //this.setVisible(false);
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments

@@ -98,11 +98,16 @@ public class Table extends Observable{
     }
     
     public void show(){
+        gameFrame.setVisible(true);
         Table.get().getMoveLog().clear();
         Table.get().getGameHistoryPanel().redo(chessBoard, Table.get().moveLog);
         Table.get().getGameRollPanel().turn(Table.get().getGameBoard().getMoveCount(), Table.get().getGameBoard().currentPlayer().toString());
         Table.get().getGameRollPanel().changeDie(Table.get().getGameBoard().getLastRoll());
         Table.get().getBoardPanel().drawBoard(Table.get().getGameBoard());
+    }
+    
+    public void hide(){
+        gameFrame.setVisible(false);
     }
     
     public GameSetup getGameSetup(){
@@ -143,20 +148,23 @@ public class Table extends Observable{
         newGameMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                
+                Table.get().updateGameBoard(Board.createStandardBoard());
+                Table.get().hide();
+                StartScreen start = new StartScreen();
+                start.setVisible(true);
             }
         });
         fileMenu.add(newGameMenuItem);
         fileMenu.addSeparator();
         
         final JMenuItem exitMenuItem = new JMenuItem("Exit");
-        exitMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                Table.get().getGameFrame().dispose();
-                System.exit(0);
-            }
-        });
+       // exitMenuItem.addActionListener(new ActionListener() {
+            //@Override
+            //public void actionPerformed(ActionEvent ae) {
+                //Table.get().getGameFrame().dispose();
+                //System.exit(0);
+            //}
+        //});
         fileMenu.add(exitMenuItem);
         
         return fileMenu;
