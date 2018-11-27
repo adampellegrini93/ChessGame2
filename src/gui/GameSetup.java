@@ -152,7 +152,7 @@ class GameSetup extends JDialog{
         return spinner;
     }
 
-    int getSearchDepth(Alliance alliance) {
+    public int getSearchDepth(Alliance alliance) {
         if(alliance.isWhite()){
             return whiteDifficulty;
         }

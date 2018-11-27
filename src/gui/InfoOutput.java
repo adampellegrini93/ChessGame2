@@ -5,6 +5,8 @@
  */
 package gui;
 
+import javax.swing.JFrame;
+
 /**
  *
  * @author adam pellegrini
@@ -15,9 +17,10 @@ public class InfoOutput extends javax.swing.JFrame {
      * Creates new form InfoOutput
      */
     public InfoOutput() {
-        this.setLocation(0, 0);
-        this.setSize(200, 400);
         initComponents();
+        //this.setLocation(0, 0);
+        //this.setSize(200, 400);
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
     /**
@@ -89,6 +92,14 @@ public class InfoOutput extends javax.swing.JFrame {
     
     public void addText(String text){
         textArea.append(text + "\n");
+    }
+    
+    public int getTextSize(){
+        return textArea.getText().length();
+    }
+    
+    public void clearText(){
+        textArea.setText("");
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

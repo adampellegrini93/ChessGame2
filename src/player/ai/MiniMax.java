@@ -35,7 +35,7 @@ public class MiniMax implements MoveStrategy{
         //System.out.println(board.currentPlayer() + " Enemy AI thinking");
         
         int numMoves = board.currentPlayer().getLegalMoves().size();
-        System.out.println("There are "+numMoves + " possible moves");
+        //System.out.println("There are "+numMoves + " possible moves");
         
         for(final Move move : board.currentPlayer().getLegalMoves()){
             

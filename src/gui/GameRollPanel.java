@@ -17,7 +17,8 @@ public class GameRollPanel extends JPanel{
     private final JPanel northPanel = new JPanel();
     private final JLabel northLabel1;
     private final JLabel northLabel2;
-    private final JLabel centerPanel;
+    public final JLabel centerPanel;
+    private final JLabel moveDisplay;
     
     public GameRollPanel(){
         this.setLayout(new FlowLayout());
@@ -29,15 +30,21 @@ public class GameRollPanel extends JPanel{
         northLabel1.setFont(new Font("Calibri", Font.ITALIC, 16));
         northLabel1.setBackground(Color.BLACK);
         northLabel2 = new JLabel("first move");
+        moveDisplay = new JLabel("");
         northPanel.add(this.northLabel1, BorderLayout.NORTH);
         northPanel.add(this.northLabel2, BorderLayout.CENTER);
+        northPanel.add(this.moveDisplay, BorderLayout.SOUTH);
         
         centerPanel = new JLabel(new ImageIcon(getClass().getResource("/images/misc/die1.png")));
+        centerPanel.setVisible(false);
         changeDie(1);
 
         this.add(this.northPanel);
         this.add(this.centerPanel);
         setPreferredSize(new Dimension(100, 200));
+    }
+    public void setMoveText(String moveLog){
+        moveDisplay.setText(moveLog);
     }
     
     public void turn(int num, String currentPlayer){
