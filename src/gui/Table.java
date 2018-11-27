@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -32,6 +33,7 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import pieces.Piece;
 import player.MoveTransition;
+import player.Player;
 import player.ai.MiniMax;
 import player.ai.MoveStrategy;
 
@@ -52,6 +54,7 @@ public class Table extends Observable{
     private Piece humanMovedPiece;
     private BoardDirection boardDirection;
     private boolean highlightLegalMoves;
+    private boolean gameOver;
     
     private final  Dimension OUTER_FRAME_DIMENSION = new Dimension(900,700);
     private final  Dimension BOARD_PANEL_DIMENSION = new Dimension(500,450);
@@ -72,8 +75,10 @@ public class Table extends Observable{
         this.gameHistoryPanel = new GameHistoryPanel();
         this.gameRollPanel = new GameRollPanel();
         this.takenPiecesPanel = new TakenPiecesPanel();
+        this.takenPiecesPanel.setVisible(false);
         this.info = new InfoOutput();
         this.highlightLegalMoves = true;
+        this.gameOver = false;
         this.boardPanel = new BoardPanel();
         this.moveLog = new MoveLog();
         this.addObserver(new TableGameAIWatcher());
@@ -84,7 +89,6 @@ public class Table extends Observable{
         this.gameFrame.add(this.gameRollPanel, BorderLayout.EAST);
         this.gameFrame.setLocationRelativeTo(null);
         this.gameFrame.setVisible(true);
-        
         //stops program from continuosly running after main window is closed
         this.gameFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
@@ -134,15 +138,6 @@ public class Table extends Observable{
     //creates and populates the File drop down menu
     private JMenu createFileMenu() {
         final JMenu fileMenu = new JMenu("File");
-        final JMenuItem openPGN = new JMenuItem("Show game info");
-        openPGN.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                    info.setVisible(true);
-            }
-        });
-        fileMenu.add(openPGN);
-        fileMenu.addSeparator();
         
         final JMenuItem newGameMenuItem = new JMenuItem("New Game");
         newGameMenuItem.addActionListener(new ActionListener() {
@@ -152,6 +147,12 @@ public class Table extends Observable{
                                     //Hiding the main pane gives the prevents players from "cancelling" making a new game
                 Table.get().getGameSetup().update(false, true, false, true, 1, 1);  //force ends ai
                 Table.get().updateGameBoard(Board.createStandardBoard());
+                Table.get().gameOver = false;
+                Table.get().getGameRollPanel().centerPanel.setVisible(false);
+                if(info.isVisible()){
+                    info.setVisible(false);
+                }
+                info.clearText();
                 StartScreen start = new StartScreen();
                 start.setVisible(true);
             }
@@ -175,17 +176,6 @@ public class Table extends Observable{
     //creates and populates the preferences drop down menu
     private JMenu createPreferencesMenu(){
         final JMenu preferencesMenu = new JMenu("Preferences");
-        final JMenuItem flipBoardMenuItem = new JMenuItem("Flip Board");
-        flipBoardMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                boardDirection = boardDirection.opposite();
-                boardPanel.drawBoard(chessBoard);
-            }
-        });
-        preferencesMenu.add(flipBoardMenuItem);
-        
-        preferencesMenu.addSeparator();
         
         final JCheckBoxMenuItem legalMoveHighlighterCheckbox = new JCheckBoxMenuItem("Highlight legal moves",true);
         legalMoveHighlighterCheckbox.addActionListener(new ActionListener() {
@@ -195,18 +185,29 @@ public class Table extends Observable{
             }
         });
         preferencesMenu.add(legalMoveHighlighterCheckbox);
+        
+        preferencesMenu.addSeparator();
+        
+        final JCheckBoxMenuItem showTakePiecesPanelCheckbox = new JCheckBoxMenuItem("Show Taken Pieces Panel",false);
+        showTakePiecesPanelCheckbox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                Table.get().takenPiecesPanel.setVisible(showTakePiecesPanelCheckbox.isSelected());
+            }
+        });
+        preferencesMenu.add(showTakePiecesPanelCheckbox);
         return preferencesMenu;
     }
     
     private JMenu createOptionsMenu(){
-        final JMenu optionsMenu = new JMenu("Options");
+        final JMenu optionsMenu = new JMenu("Help");
         
-        final JMenuItem setupGameMenuItem = new JMenuItem("Settings");
+        final JMenuItem setupGameMenuItem = new JMenuItem("How to Play");
         setupGameMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                //Table.get().getGameSetup().promptUser();
-                //Table.get().setupUpdate(Table.get().getGameSetup());
+                HowToPlay howTo = new HowToPlay();
+                howTo.setVisible(true);
             }
         });
         
@@ -226,22 +227,49 @@ public class Table extends Observable{
         @Override
         public void update(final Observable o,final Object o1) {
             
-            if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer())) {
+            if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer()) && Table.get().gameOver != true) {
                 //create an AI thread and execute it
                 final AIThinkTank thinkTank = new AIThinkTank();
                 if(!Table.get().getGameBoard().currentPlayer().kingTaken() && !Table.get().getGameBoard().currentPlayer().getOpponent().kingTaken()) //prevents ai from continuing when game ends
                     thinkTank.execute();
             }
             
-            if(Table.get().getGameBoard().currentPlayer().kingTaken()){
-                JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over, "+ Table.get().getGameBoard().currentPlayer() + "'s king was taken!", 
-                        "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            if(Table.get().getGameBoard().currentPlayer().kingTaken() && Table.get().gameOver != true){
+               Table.get().gameOver = true;
+               displayGameOver(Table.get().getGameBoard().currentPlayer());
+                //JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over, "+ Table.get().getGameBoard().currentPlayer() + "'s king was taken!", 
+                        //"Game Over", JOptionPane.INFORMATION_MESSAGE);
             }
-            else if (Table.get().getGameBoard().currentPlayer().getOpponent().kingTaken()){
-                JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over, "+ Table.get().getGameBoard().currentPlayer().getOpponent() + "'s king was taken!", 
-                        "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            else if (Table.get().getGameBoard().currentPlayer().getOpponent().kingTaken() && Table.get().gameOver != true){
+                Table.get().gameOver = true;
+                displayGameOver(Table.get().getGameBoard().currentPlayer().getOpponent());
+                //JOptionPane.showMessageDialog(Table.get().getBoardPanel(), "Game Over, "+ Table.get().getGameBoard().currentPlayer().getOpponent() + "'s king was taken!", 
+                        //"Game Over", JOptionPane.INFORMATION_MESSAGE);
             }
         }     
+    }
+    
+    public static void displayGameOver(Player player){
+        Object[] options = { "New Game", "Exit"};
+                JPanel panel = new JPanel();
+                panel.add(new JLabel("Game Over, "+ player + "'s king was taken!"));
+                int result = JOptionPane.showOptionDialog(null, panel, "Game Over",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+                    options, null);
+                if (result == JOptionPane.YES_OPTION) {
+                    Table.get().hide(); //NOTE: entire program ends when any exit button is pressed. 
+                                    //Hiding the main pane gives the prevents players from "cancelling" making a new game
+                    Table.get().getGameSetup().update(false, true, false, true, 1, 1);  //force ends ai
+                    Table.get().updateGameBoard(Board.createStandardBoard());
+                    Table.get().gameOver = false;
+                    Table.get().getGameRollPanel().centerPanel.setVisible(false);
+                    StartScreen start = new StartScreen();
+                    start.setVisible(true);
+                }
+                if(result == JOptionPane.NO_OPTION){
+                    Table.get().getGameFrame().dispose();
+                    System.exit(0);
+                }
     }
     
     public void updateGameBoard(final Board board){
@@ -295,7 +323,17 @@ public class Table extends Observable{
         public void done(){
             
             try {
+                if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer())
+                        && Table.get().getGameSetup().getSearchDepth(Table.get().getGameBoard().currentPlayer().getAlliance()) == 1)
+                {
+                    TimeUnit.SECONDS.sleep(1);
+                }
                 final Move bestMove = get();
+                if(bestMove.isAttack()){
+                    Table.get().getGameRollPanel().centerPanel.setVisible(true);
+                }else{
+                    Table.get().getGameRollPanel().centerPanel.setVisible(false);
+                }
                 Table.get().updateComputerMove(bestMove);
                 Table.get().updateGameBoard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove, true).getTransitionBoard());
                 if(Table.get().getGameBoard().getMoveCount() == 1){
@@ -454,6 +492,11 @@ public class Table extends Observable{
                                 chessBoard = transition.getTransitionBoard();
                                 Table.get().getGameRollPanel().turn(Table.get().getGameBoard().getMoveCount(), Table.get().getGameBoard().currentPlayer().toString());
                                 Table.get().getGameRollPanel().changeDie(Table.get().getGameBoard().getLastRoll());
+                                if(move.isAttack()){
+                                    Table.get().getGameRollPanel().centerPanel.setVisible(true);
+                                }else{
+                                    Table.get().getGameRollPanel().centerPanel.setVisible(false);
+                                }
                                 moveLog.addMove(move);
                             }
                             sourceTile = null;
