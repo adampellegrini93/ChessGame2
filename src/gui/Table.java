@@ -212,6 +212,18 @@ public class Table extends Observable{
         });
         
         optionsMenu.add(setupGameMenuItem);
+        optionsMenu.addSeparator();
+        
+        final JMenuItem moveLogMenuItem = new JMenuItem("Move Log");
+        moveLogMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                moveLogInformation info = new moveLogInformation();
+                info.setVisible(true);
+            }
+        });
+        
+        optionsMenu.add(moveLogMenuItem);
         
         return optionsMenu;
     }
@@ -305,6 +317,19 @@ public class Table extends Observable{
         notifyObservers(playerType);
     }
     
+    public void setMoveText(Move move){
+        String display = "Previous: ";
+        if(move.isAttack()){
+            display = display + move.getMovedPiece().toString() + BoardUtils.getPositionAtCoordinate(move.getCurrentCoordinate())
+                    + "x" + move.getAttackedPiece().toString() + BoardUtils.getPositionAtCoordinate(move.getDestinationCoordinate());
+        }
+        else{
+            display = display + move.getMovedPiece().toString() + BoardUtils.getPositionAtCoordinate(move.getCurrentCoordinate())
+                    + ">" + BoardUtils.getPositionAtCoordinate(move.getDestinationCoordinate());
+        }
+        Table.get().getGameRollPanel().setMoveText(display);
+    }
+    
     //swingworker allows threadwork in gui without blocking gui thread
     private static class AIThinkTank extends SwingWorker<Move, String>{
         
@@ -323,11 +348,13 @@ public class Table extends Observable{
         public void done(){
             
             try {
+                
                 if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer())
                         && Table.get().getGameSetup().getSearchDepth(Table.get().getGameBoard().currentPlayer().getAlliance()) == 1)
                 {
                     TimeUnit.SECONDS.sleep(1);
                 }
+                
                 final Move bestMove = get();
                 if(bestMove.isAttack()){
                     Table.get().getGameRollPanel().centerPanel.setVisible(true);
@@ -485,10 +512,7 @@ public class Table extends Observable{
                                     sourceTile.getTileCoordinate(), destinationTile.getTileCoordinate());
                             final MoveTransition transition = chessBoard.currentPlayer().makeMove(move, true);
                             if(transition.getMoveStatus().isDone()){
-                                if(info.isVisible()){
-                                    info.addText(chessBoard.currentPlayer().toString()+" player has made their move!");
-                                    info.addText("It is now " + chessBoard.currentPlayer().getOpponent().toString()+ " playes turn!");
-                                }
+                                Table.get().setMoveText(move);
                                 chessBoard = transition.getTransitionBoard();
                                 Table.get().getGameRollPanel().turn(Table.get().getGameBoard().getMoveCount(), Table.get().getGameBoard().currentPlayer().toString());
                                 Table.get().getGameRollPanel().changeDie(Table.get().getGameBoard().getLastRoll());

@@ -2,6 +2,7 @@ package board;
 
 import java.lang.Math;
 import board.Board.Builder;
+import gui.Table;
 import pieces.Pawn;
 import pieces.Piece;
 import pieces.Rook;

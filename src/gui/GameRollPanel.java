@@ -25,7 +25,7 @@ public class GameRollPanel extends JPanel{
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
         
         northPanel.setLayout(new BorderLayout());
-        northPanel.setBorder(new EmptyBorder(10, 10, 30, 10));
+        northPanel.setBorder(new EmptyBorder(10, 10, 50, 10));
         northLabel1 = new JLabel("WHITE's");
         northLabel1.setFont(new Font("Calibri", Font.ITALIC, 16));
         northLabel1.setBackground(Color.BLACK);
@@ -41,7 +41,7 @@ public class GameRollPanel extends JPanel{
 
         this.add(this.northPanel);
         this.add(this.centerPanel);
-        setPreferredSize(new Dimension(100, 200));
+        setPreferredSize(new Dimension(150, 200));
     }
     public void setMoveText(String moveLog){
         moveDisplay.setText(moveLog);
